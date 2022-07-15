@@ -27,7 +27,7 @@ class RealStateController extends Controller
     {
         try{
 
-            $realState = $this->realState->findOrFail($id);
+            $realState = $this->realState->with('photos')->findOrFail($id);
 
             return response()->json([
                 'data' =>  $realState
@@ -42,13 +42,24 @@ class RealStateController extends Controller
     {
 
         $data = $request->all();
-
+        $images = $request->file('images');
         try{
 
             $realState = $this->realState->create($data);
 
             if(isset($data['categories']) && count($data['categories'])){
                 $realState->categories()->sync($data['categories']);
+            }
+
+            if($images) {
+                $imagesUploaded = [];
+
+                foreach ($images as $image) {
+                    $path = $image->store('images', 'public');
+                    $imagesUploaded[] = ['photos' => $path, 'is_thumb' => false];
+                }
+
+                $realState->photos()->createMany($imagesUploaded);
             }
 
             return response()->json([
@@ -66,6 +77,7 @@ class RealStateController extends Controller
     public function update($id, RealStateRequest $request)
     {
         $data = $request->all();
+        $images = $request->file('images');
 
         try{
 
@@ -75,12 +87,23 @@ class RealStateController extends Controller
             if(isset($data['categories']) && count($data['categories'])){
                 $realState->categories()->sync($data['categories']);
             }
+            if($images) {
+                $imagesUploaded = [];
+
+                foreach ($images as $image) {
+                    $path = $image->store('images', 'public');
+                    $imagesUploaded[] = ['photos' => $path, 'is_thumb' => false];
+                }
+
+                $realState->photos()->createMany($imagesUploaded);
+            }
 
             return response()->json([
                 'data' => [
                     'msg' => 'Imóvel atualizado com sucesso!'
                 ]
             ], 200);
+
         } catch (\Exception $e) {
             $message = new ApiMessages($e->getMessage());
             return response()->json($message->getMessage, 401);
