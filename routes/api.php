@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\RealStateController;
+use App\Http\Controllers\Api\Auth\LoginJwtController;
 use App\Http\Controllers\Api\RealStatePhotoController;
 
 /*
@@ -19,11 +20,19 @@ use App\Http\Controllers\Api\RealStatePhotoController;
 |
 */
 
+
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
 Route::prefix('v1')->group(function(){
+
+    Route::post('login', [LoginJwtController::class, 'login'])->name('login');
+    Route::get('logout', [LoginJwtController::class, 'logout'])->name('logout');
+    Route::get('refresh', [LoginJwtController::class, 'refresh'])->name('refresh');
+
+Route::group(['middleware' => ['jwt.auth']], function(){
 
     Route::name('real_states.')->group(function(){
 
@@ -53,4 +62,5 @@ Route::prefix('v1')->group(function(){
 
         Route::put('/set-thumb/{photoId}/{realStateId}', [RealStatePhotoController::class, 'setThumb'])->name('delete');
     });
+});
 });
