@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\RealStateController;
 use App\Http\Controllers\Api\Auth\LoginJwtController;
 use App\Http\Controllers\Api\RealStatePhotoController;
+use App\Http\Controllers\Api\RealStateSearchController;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,6 +32,10 @@ Route::prefix('v1')->group(function(){
     Route::post('login', [LoginJwtController::class, 'login'])->name('login');
     Route::get('logout', [LoginJwtController::class, 'logout'])->name('logout');
     Route::get('refresh', [LoginJwtController::class, 'refresh'])->name('refresh');
+
+    Route::get('search', [RealStateSearchController::class, 'index'])->name('search');
+
+    Route::get('search/{real_state}', [RealStateSearchController::class, 'show'])->name('search_single');
 
 Route::group(['middleware' => ['jwt.auth']], function(){
 
